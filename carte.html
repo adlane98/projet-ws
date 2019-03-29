@@ -1,65 +1,75 @@
-<!-- https://developers.google.com/maps/documentation/javascript/tutorial -->
 <!DOCTYPE html>
 <meta charset="UTF-8">
 <html>
-  <head>
-    <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      #map {
-        height: 50%;
-      }
-      /* Optional: Makes the sample page fill the window. */
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="map"></div>
-    <script>
-      var map;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 2,
-          center: {lat: -33.865427, lng: 151.196123},
-          mapTypeId: 'terrain'
-        });
+    <head>
+        <style>
+            /* Always set the map height explicitly to define the size of the div
+            * element that contains the map. */
+            #map {
+                height: 50%;
+            }
+            /* Optional: Makes the sample page fill the window. */
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script>
+            var map;
+            function mapInitialisation() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 5,
+                    center: {lat: 47, lng: 2.3},
+                    mapTypeId: 'terrain',
+                    mapTypeControl: false,
+                    streetViewControl: false
+                });
 
-        // Create a <script> tag and set the USGS URL as the source.
-        var getEarthquake = document.createElement('script');
-        getEarthquake.src = 'http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.geojsonp';
-        console.log(Object.values(getEarthquake));
-        document.getElementsByTagName('head')[0].appendChild(getEarthquake);
+                map.data.loadGeoJson('https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2019-03-25&endtime=2019-03-28&minmagnitude=1&maxmagnitude=2');
 
-        map.data.setStyle(function(feature) {
-          var magnitude = feature.getProperty('mag');
-          return {
-            icon: getCircle(magnitude)
-          };
-        });
-      }
+                map.data.setStyle(function(feature) {
+                    return {
+                        icon: getCircle(feature.getProperty('mag'))
+                    };
+                });
+            }
 
-      function getCircle(magnitude) {
-        return {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: 'dark',
-          fillOpacity: .2,
-          scale: Math.pow(2, magnitude) / 2,
-          strokeColor: 'grey',
-          strokeWeight: .5
-        };
-      }
+            function loadEarthquakeLayer(dataLayer = map.data, start = null, end = null, min = null, max = null, lat = null, lon = null, rad = 20000, limit = 100) {
+                var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
+                query += '&limit=' + limit;
+                query += '&endtime=' + end;
+                query += '&starttime=' + start;
+                query += '&minmagnitude=' + min;
+                query += '&maxmagnitude=' + max;
+                query += '&latitude=' + lat;
+                query += '&longitude='+ lon;
+                if (lat && lon)
+                    query += '&maxradiuskm' + rad;
+                dataLayer.loadGeoJson(query);
+            }
 
-      function eqfeed_callback(results) {
-        console.log(results.features);
-        map.data.addGeoJson(results);
-      }
-    </script>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE&callback=initMap">
-    </script>
-  </body>
+            function eraseLayer(dataLayer = map.data) {
+                dataLayer.forEach(function(feature){map.data.remove(feature);});
+            }
+
+            function getCircle(magnitude) {
+                return {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    fillColor: 'darkgray',
+                    fillOpacity: .2,
+                    scale: Math.pow(2, magnitude) / 2,
+                    strokeColor: 'grey',
+                    strokeWeight: .5
+                };
+            }
+
+        </script>
+        <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE&callback=mapInitialisation">
+        </script>
+    </body>
 </html>
