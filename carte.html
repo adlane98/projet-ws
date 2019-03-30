@@ -6,7 +6,7 @@
             /* Always set the map height explicitly to define the size of the div
             * element that contains the map. */
             #map {
-                height: 50%;
+                height: 90%;
             }
             /* Optional: Makes the sample page fill the window. */
             html, body {
@@ -20,16 +20,25 @@
         <div id="map"></div>
         <script>
             var map;
+
             function mapInitialisation() {
                 map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 5,
-                    center: {lat: 47, lng: 2.3},
+                    zoom: 2,
+                    minZoom: 2,
+                    restriction: {
+                        latLngBounds: {
+                                north: 85,
+                                south: -85,
+                                west: -85,
+                                east: 85,
+                            },
+                        strictBounds: false },
+                    center: {lat: 47, lng: 2.8},
                     mapTypeId: 'terrain',
-                    mapTypeControl: false,
-                    streetViewControl: false
+                    disableDefaultUI: true
                 });
 
-                map.data.loadGeoJson('https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2019-03-25&endtime=2019-03-28&minmagnitude=1&maxmagnitude=2');
+                loadEarthquakeLayer("2014-01-01", undefined, 1, 2, undefined, undefined, undefined, 10);
 
                 map.data.setStyle(function(feature) {
                     return {
@@ -38,18 +47,24 @@
                 });
             }
 
-            function loadEarthquakeLayer(dataLayer = map.data, start = null, end = null, min = null, max = null, lat = null, lon = null, rad = 20000, limit = 100) {
+            function loadEarthquakeLayer(start = null, end = null, min = null, max = null, lat = null, lng = null, rad = null, limit = 100) {
                 var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
                 query += '&limit=' + limit;
-                query += '&endtime=' + end;
-                query += '&starttime=' + start;
-                query += '&minmagnitude=' + min;
-                query += '&maxmagnitude=' + max;
-                query += '&latitude=' + lat;
-                query += '&longitude='+ lon;
-                if (lat && lon)
+                if (start)
+                    query += '&starttime=' + start;
+                if (end)
+                    query += '&endtime=' + end;
+                if (min)
+                    query += '&minmagnitude=' + min;
+                if (max)
+                    query += '&maxmagnitude=' + max;
+                if (lat)
+                    query += '&latitude=' + lat;
+                if (lng)
+                    query += '&longitude='+ lng;
+                if (lat && lon && rad)
                     query += '&maxradiuskm' + rad;
-                dataLayer.loadGeoJson(query);
+                map.data.loadGeoJson(query);
             }
 
             function eraseLayer(dataLayer = map.data) {
@@ -59,9 +74,9 @@
             function getCircle(magnitude) {
                 return {
                     path: google.maps.SymbolPath.CIRCLE,
-                    fillColor: 'darkgray',
+                    fillColor: 'darkgrey',
                     fillOpacity: .2,
-                    scale: Math.pow(2, magnitude) / 2,
+                    scale: magnitude*10,
                     strokeColor: 'grey',
                     strokeWeight: .5
                 };
@@ -69,7 +84,7 @@
 
         </script>
         <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE&callback=mapInitialisation">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE&callback=mapInitialisation&libraries=places">
         </script>
     </body>
 </html>
