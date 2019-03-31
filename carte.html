@@ -21,32 +21,6 @@
         <script>
             var map;
 
-            function mapInitialisation() {
-                map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 2,
-                    minZoom: 2,
-                    restriction: {
-                        latLngBounds: {
-                                north: 85,
-                                south: -85,
-                                west: -85,
-                                east: 85,
-                            },
-                        strictBounds: false },
-                    center: {lat: 47, lng: 2.8},
-                    mapTypeId: 'terrain',
-                    disableDefaultUI: true
-                });
-
-                loadEarthquakeLayer("2014-01-01", undefined, 1, 2, undefined, undefined, undefined, 10);
-
-                map.data.setStyle(function(feature) {
-                    return {
-                        icon: getCircle(feature.getProperty('mag'))
-                    };
-                });
-            }
-
             function loadEarthquakeLayer(start = null, end = null, min = null, max = null, lat = null, lng = null, rad = null, limit = 100) {
                 var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
                 query += '&limit=' + limit;
@@ -67,6 +41,32 @@
                 map.data.loadGeoJson(query);
             }
 
+            function mapInitialisation() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 2,
+                    minZoom: 2,
+                    restriction: {
+                        latLngBounds: {
+                                north: 85,
+                                south: -85,
+                                west: -190,
+                                east: 190,
+                            },
+                        strictBounds: false },
+                    center: {lat: 47, lng: 2.8},
+                    mapTypeId: 'terrain',
+                    disableDefaultUI: true
+                });
+
+                loadEarthquakeLayer("2014-01-01", undefined, 6, undefined, undefined, undefined, undefined, 10);
+
+                map.data.setStyle(function(feature) {
+                    return {
+                        icon: getCircle(feature.getProperty('mag'))
+                    };
+                });
+            }
+
             function eraseLayer(dataLayer = map.data) {
                 dataLayer.forEach(function(feature){map.data.remove(feature);});
             }
@@ -76,7 +76,7 @@
                     path: google.maps.SymbolPath.CIRCLE,
                     fillColor: 'darkgrey',
                     fillOpacity: .2,
-                    scale: magnitude*10,
+                    scale: 10*magnitude,
                     strokeColor: 'grey',
                     strokeWeight: .5
                 };
