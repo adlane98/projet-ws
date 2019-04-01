@@ -42,15 +42,24 @@ function mapInitialisation() {
 
     /******* Seismes *******/
     map.data.setStyle(circleMagnitude);
+
+    var infoWindow = new google.maps.InfoWindow({
+            content: '<div id="content">'
+                    +'<div id="bodyContent">'
+                    +'Quelque part'
+                    +'</div>'
+                    +'</div>'
+    });
+
     map.data.addListener('click', function(event) {
-                                                        /* traiter les données du seisme */
-                                                        console.log(event.feature.getProperty('mag'));
-                                                  });
+                                                        infoWindow.open(map, map.data);
+                                                        console.log(event.feature.getProperty('place'));
+                                                    });
 }
 
 function loadEarthquakeLayer(start = null, end = null, min = null, max = null, lat = null, lng = null, rad = null, limit = 100) {
     var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
-    
+
     query += '&limit=' + limit;
     if (start || end)
         query += '&starttime=' + start + '&endtime=' + end;
@@ -95,4 +104,14 @@ function circleMagnitude(earthquake) {
         },
         zIndex: Math.floor(currentMag)
     };
+}
+
+
+
+function loadVideos() {
+    return 'https://developers.google.com/apis-explorer/#p/youtube/v3/youtube.search.list?part=snippet'
+        + '&key=AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE'
+        + '&type=video'
+        + '&order=viewCount'
+        + '&q=skateboarding+dog';
 }
