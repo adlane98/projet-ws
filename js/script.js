@@ -6,38 +6,61 @@ function mapInitialisation() {
         minZoom: 2,
         restriction: {
             latLngBounds: {
-                    north: 85,
-                    south: -85,
-                    west: -190,
-                    east: 190,
+                    north: 89.45016124669523,
+                    south: -87.71179927260242,
+                    west: -200,
+                    east: 200,
                 },
-            strictBounds: false},
+            strictBounds: true},
         center: {lat: 47, lng: 2.8},
         mapTypeId: 'terrain',
         disableDefaultUI: true
     });
 
+    /******* Recherche *******/
+    var input = document.getElementById('searchBox');
+    var searchBox = new google.maps.places.SearchBox(input);
+
+    map.addListener('bounds_changed', function() {
+                                                    searchBox.setBounds(map.getBounds());
+                                                 });
+
+    searchBox.addListener('places_changed', function() {
+        var place = searchBox.getPlaces()[0];
+        var bounds = new google.maps.LatLngBounds();
+
+        if (!place.geometry) return;
+
+        if (place.geometry.viewport)
+            bounds.union(place.geometry.viewport);
+        else
+            bounds.extend(place.geometry.location);
+        map.fitBounds(bounds);
+
+        console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
+    });
+
+    /******* Seismes *******/
     map.data.setStyle(circleMagnitude);
-    map.data.addListener('click', function(event) {/* traiter les données du seisme */console.log(event.feature.getProperty('mag'));});
+    map.data.addListener('click', function(event) {
+                                                        /* traiter les données du seisme */
+                                                        console.log(event.feature.getProperty('mag'));
+                                                  });
 }
 
 function loadEarthquakeLayer(start = null, end = null, min = null, max = null, lat = null, lng = null, rad = null, limit = 100) {
     var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
+    
     query += '&limit=' + limit;
-    if (start)
-        query += '&starttime=' + start;
-    if (end)
-        query += '&endtime=' + end;
-    if (min)
-        query += '&minmagnitude=' + min;
-    if (max)
-        query += '&maxmagnitude=' + max;
-    if (lat)
-        query += '&latitude=' + lat;
-    if (lng)
-        query += '&longitude='+ lng;
+    if (start || end)
+        query += '&starttime=' + start + '&endtime=' + end;
+    if (min || max)
+        query += '&minmagnitude=' + min + '&maxmagnitude=' + max;
+    if (lat || lng)
+        query += '&latitude=' + lat + '&longitude='+ lng;
     if (lat && lon && rad)
         query += '&maxradiuskm' + rad;
+
     map.data.loadGeoJson(query);
 }
 
