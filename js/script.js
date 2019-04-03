@@ -5,7 +5,7 @@ var map;
  */
 function mapInitialisation() {
     map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 2,
+        zoom: 3,
         minZoom: 2,
         restriction: {
             latLngBounds: {
@@ -15,7 +15,7 @@ function mapInitialisation() {
                     east: 180,
                 },
             strictBounds: false},
-        center: {lat: 47, lng: 2.8},
+        center: {lat: 30, lng: 0},
         mapTypeId: 'terrain',
         disableDefaultUI: true
     });
@@ -30,19 +30,22 @@ function mapInitialisation() {
 
     searchBox.addListener('places_changed', function() {
         var place = searchBox.getPlaces()[0];
-        if(place.types.includes('country'))
-            console.log(place); // TODO: Trouver des celebrites qui viennent de ce pays
-        var bounds = new google.maps.LatLngBounds();
 
-        if (!place.geometry) return;
+        if (place) {
+            if(place.types.includes('country'))
+                loadCountryPeople(place.formatted_address, 10);
 
-        if (place.geometry.viewport)
-            bounds.union(place.geometry.viewport);
-        else
-            bounds.extend(place.geometry.location);
-        map.fitBounds(bounds);
+            var bounds = new google.maps.LatLngBounds();
 
-        console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
+            if (!place.geometry) return;
+            if (place.geometry.viewport)
+                bounds.union(place.geometry.viewport);
+            else
+                bounds.extend(place.geometry.location);
+            map.fitBounds(bounds);
+
+            console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
+        }
     });
 
     /******* Seismes *******/
@@ -79,7 +82,6 @@ function mapInitialisation() {
  */
 function loadEarthquakeLayer(start = null, end = null, min = null, max = null, lat = null, lng = null, rad = null, limit = 100) {
     var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
-    query += '&orderby=time-asc';
     query += '&limit=' + limit;
     if (start || end)
         query += '&starttime=' + start + '&endtime=' + end;
@@ -159,12 +161,44 @@ function parseDate(date) {
 }
 
 
+function loadCountryPeople(country, nb = 100) {
+    var query = 'PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>'
+              + 'PREFIX dbpedia: <http://dbpedia.org/resource/>'
+              + 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>'
+              + 'PREFIX foaf: <http://xmlns.com/foaf/0.1/>'
+              + 'SELECT DISTINCT ?name ?desc WHERE {'
+              +     'Optional{'
+              +         '?person dbpedia-owl:birthPlace ?country .'
+              +     '}'
+              +     'Optional{'
+              +         '?person dbpedia-owl:birthPlace ?place .'
+              +         '?place dbpedia-owl:country ?country .'
+              +     '}'
+              +     '?person a dbpedia-owl:Person ;'
+              +             'rdfs:comment ?desc ;'
+              +             'rdfs:label ?name .'
+              +     '?country a dbpedia-owl:Country ;'
+              +              'rdfs:label ?countryName .'
+              +     "FILTER(LANG(?name)='en' && LANG(?desc)='en' && regex(?countryName, '^" + country + "', 'i')) ."
+              + '} LIMIT ' + nb;
+
+    var request = 'http://dbpedia.org/sparql?default-graph-uri=&query='
+                + encodeURIComponent(query).replace(/'/g,"%27").replace(/"/g,"%22")
+                + '&format=application%2Fsparql-results%2Bjson';
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", request, true);
+    xhr.send(null);
+    xhr.addEventListener("load", function() {
+                                                var results;
+                                                try{results = JSON.parse(this.responseText).results.bindings;}
+                                                catch{}
+                                                console.log(results); // TODO: traiter les resultats de la requete
+                                            });
+}
+
 /**
  */
 function loadVideos() {
-    return 'https://developers.google.com/apis-explorer/#p/youtube/v3/youtube.search.list?part=snippet'
-        + '&key=AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE'
-        + '&type=video'
-        + '&order=viewCount'
-        + '&q=skateboarding+dog';
+    return 'https://developers.google.com/apis-explorer/#p/youtube/v3/youtube.search.list?part=snippet&key=AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE&type=video&order=viewCount&q=skateboarding+dog';
 }
