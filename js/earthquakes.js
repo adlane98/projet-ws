@@ -1,6 +1,5 @@
 var map;
 
-
 /** Initialise la carte et ajoute les gestionnaires d'evenements
  */
 function mapInitialisation() {
@@ -158,47 +157,4 @@ function parseDate(date) {
     var temps = new Date();
     temps.setTime(date);
     return temps.toUTCString();
-}
-
-
-function loadCountryPeople(country, nb = 100) {
-    var query = 'PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>'
-              + 'PREFIX dbpedia: <http://dbpedia.org/resource/>'
-              + 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>'
-              + 'PREFIX foaf: <http://xmlns.com/foaf/0.1/>'
-              + 'SELECT DISTINCT ?name ?desc WHERE {'
-              +     'Optional{'
-              +         '?person dbpedia-owl:birthPlace ?country .'
-              +     '}'
-              +     'Optional{'
-              +         '?person dbpedia-owl:birthPlace ?place .'
-              +         '?place dbpedia-owl:country ?country .'
-              +     '}'
-              +     '?person a dbpedia-owl:Person ;'
-              +             'rdfs:comment ?desc ;'
-              +             'rdfs:label ?name .'
-              +     '?country a dbpedia-owl:Country ;'
-              +              'rdfs:label ?countryName .'
-              +     "FILTER(LANG(?name)='en' && LANG(?desc)='en' && regex(?countryName, '^" + country + "', 'i')) ."
-              + '} LIMIT ' + nb;
-
-    var request = 'http://dbpedia.org/sparql?default-graph-uri=&query='
-                + encodeURIComponent(query).replace(/'/g,"%27").replace(/"/g,"%22")
-                + '&format=application%2Fsparql-results%2Bjson';
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", request, true);
-    xhr.send(null);
-    xhr.addEventListener("load", function() {
-                                                var results;
-                                                try{results = JSON.parse(this.responseText).results.bindings;}
-                                                catch{}
-                                                console.log(results); // TODO: traiter les resultats de la requete
-                                            });
-}
-
-/**
- */
-function loadVideos() {
-    return 'https://developers.google.com/apis-explorer/#p/youtube/v3/youtube.search.list?part=snippet&key=AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE&type=video&order=viewCount&q=skateboarding+dog';
 }
