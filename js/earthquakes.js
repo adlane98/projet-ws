@@ -134,6 +134,7 @@ function mapInitialisation() {
                 //maxradius   : ,
                 maxradiuskm : 5000
             };
+            
             loadEarthquakeLayerBis(eq);
 
             console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
@@ -193,18 +194,17 @@ function loadEarthquakeLayer(start = null, end = null, min = null, max = null, l
 }
 
 function loadEarthquakeLayerBis(eq, limit = 100) {
-
     eraseEarthquakeLayer();
 
     var zoneCarre = eq.minlatitude || eq.minlongitude || eq.maxlatitude || eq.maxlongitude;
     var zoneCirculaire = eq.maxradius || eq.maxradiuskm;
 
     if (zoneCirculaire && zoneCarre)
-        throw "Des parametres de definition d'une zone circulaire et d'une zone carree sont definis";
+        throw "Des parametres de definition a la fois d'une zone circulaire et d'une zone carree sont definis.";
 
     if (zoneCirculaire) {
         if (eq.maxradius && eq.maxradiuskm) {
-            throw "maxradius et maxradiuskm ne peuvent pas etre specifiés tous les deux.";
+            throw "maxradius et maxradiuskm ne peuvent pas etre specifies tous les deux.";
         }
         if (!eq.latitude || !eq.longitude) {
             throw "Il faut specifier la latitude et la longitude pour une zone circulaire.";
