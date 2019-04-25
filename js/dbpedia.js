@@ -40,6 +40,7 @@ function peopleCallback() {
     var results;
     try{results = JSON.parse(this.responseText).results.bindings;}
     catch{}
+    console.log("people call back");
     console.log(results); // TODO: traiter les resultats de la requete
 }
 
@@ -64,5 +65,6 @@ function infoCallback() {
     var results;
     try{results = JSON.parse(this.responseText).results.bindings[0];}
     catch{}
+    console.log("info call back");
     console.log(results); // TODO: traiter les resultats de la requete
 }

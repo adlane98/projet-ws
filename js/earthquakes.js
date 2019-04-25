@@ -1,112 +1,43 @@
 var map;
 
-/** Initialise la carte et ajoute les gestionnaires d'evenements
- */
-function mapInitialisation() {
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 3,
-        minZoom: 2,
-        restriction: {
-            latLngBounds: {
-                    north: 85,
-                    south: -85,
-                    west: -180,
-                    east: 180,
-                },
-            strictBounds: false},
-        center: {lat: 30, lng: 0},
-        mapTypeId: 'terrain',
-        disableDefaultUI: true
-    });
 
-    /******* Recherche *******/
-    var input = document.getElementById('searchBox');
-    var searchBox = new google.maps.places.SearchBox(input);
+/*function Earthquake(starttime = null,   endtime = null,
+                    minmagnitude = null, maxmagnitude = null,
+                    minlatitude = null, minlongitude = null,
+                    maxlatitude = null, maxlongitude = null,
+                    latitude = null,    longitude = null,
+                    maxradius = null,   maxradiuskm = null) {
+    //Savoir quelle type de zone est definie
+    var zoneCarre = minlatitude || minlongitude || maxlatitude || maxlongitude;
+    var zoneCirculaire = maxradius || maxradiuskm;
 
-    map.addListener('bounds_changed', function() {
-                                                    searchBox.setBounds(map.getBounds());
-                                                 });
-
-    searchBox.addListener('places_changed', function() {
-        var place = searchBox.getPlaces()[0];
-
-        if (place) {
-            if(place.types.includes('country'))
-                loadCountryPeople(place.formatted_address, 10);
-
-            var bounds = new google.maps.LatLngBounds();
-
-            if (!place.geometry) return;
-            if (place.geometry.viewport)
-                bounds.union(place.geometry.viewport);
-            else
-                bounds.extend(place.geometry.location);
-            map.fitBounds(bounds);
-
-            console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
+    if (zoneCirculaire) {
+        if (maxradius && maxradiuskm) {
+            throw "maxradius et maxradiuskm ne peuvent pas etre specifiés tous les deux.";
         }
-    });
+        if (!latitude || !longitude) {
+            throw "Il faut specifier la latitude et la longitude pour une zone circulaire.";
+        }
+    }
 
-    /******* Seismes *******/
-    map.data.setStyle(circleMagnitude);
-
-    var infoWindow = new google.maps.InfoWindow();
-
-    map.data.addListener('click', function(event) {
-                                                        infoWindow.setPosition(event.feature.getGeometry().get());
-                                                        infoWindow.setContent(getContent(event.feature));
-                                                        infoWindow.open(map);
-                                                        map.setCenter(event.feature.getGeometry().get());
-                                                        if(map.getZoom()<5)
-                                                            map.setZoom(5);
-                                                  });
-
-    map.addListener('click', function() {
-                                            infoWindow.close();
-                                            map.setZoom(2);
-                                        });
-}
-
-
-
-/** Charge et affiche sur la carte les seismes correspondant au criteres suivants
- * @param start Date de debut de la requete
- * @param end   Date de fin de la requete
- * @param min   Magnitude minimum du seisme
- * @param max   Magnitude minimum du seisme
- * @param lat   Latitude de recherche des seismes
- * @param lng   Longitude de recherche des seismes
- * @param rad   Rayon de recherche autour de la position donnee
- * @param limit Nombre maximum de seismes a afficher
- */
-function loadEarthquakeLayer(start = null, end = null, min = null, max = null, lat = null, lng = null, rad = null, limit = 100) {
-    var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
-    query += '&limit=' + limit;
-    if (start || end)
-        query += '&starttime=' + start + '&endtime=' + end;
-    if (min || max)
-        query += '&minmagnitude=' + min + '&maxmagnitude=' + max;
-    if (lat || lng)
-        query += '&latitude=' + lat + '&longitude='+ lng;
-    if (lat && lon && rad)
-        query += '&maxradiuskm' + rad;
-
-    map.data.loadGeoJson(query);
-}
-
-
-/** Efface les seismes affiches sur la carte
- */
-function eraseEarthquakeLayer() {
-    map.data.forEach(function(earthquake){map.data.remove(earthquake);});
-}
-
+    if (starttime)      this.starttime      = starttime;
+    if (endtime)        this.endtime        = endtime;
+    if (minmagnitude)   this.minmagnitude   = minmagnitude;
+    if (maxmagnitude)   this.maxmagnitude   = maxmagnitude;
+    if (minlatitude)    this.minlatitude    = minlatitude;
+    if (minlongitude)   this.minlongitude   = minlongitude;
+    if (maxlatitude)    this.maxlatitude    = maxlatitude;
+    if (maxlongitude)   this.maxlongitude   = maxlongitude;
+    if (maxradius)      this.maxradius      = maxradius;
+    if (maxradiuskm)    this.maxradiuskm    = maxradiuskm;
+}*/
 
 /** Recupere le marqueur (cercle) correspondant a un seisme
  * @param earthquake Le seisme a marquer
  * @return Le marqueur correspondant
  */
 function circleMagnitude(earthquake) {
+    console.log("Circle magnitude");
     var color = [];
 
     var minMag = 1.0;
@@ -135,6 +66,172 @@ function circleMagnitude(earthquake) {
         zIndex: Math.floor(currentMag)
     };
 }
+
+
+/** Initialise la carte et ajoute les gestionnaires d'evenements
+ */
+function mapInitialisation() {
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 3,
+        minZoom: 2,
+        restriction: {
+            latLngBounds: {
+                    north: 85,
+                    south: -85,
+                    west: -180,
+                    east: 180,
+                },
+            strictBounds: false},
+        center: {lat: 30, lng: 0},
+        mapTypeId: 'terrain',
+        disableDefaultUI: true
+    });
+
+    /******* Recherche *******/
+    var input = document.getElementById('searchBox');
+    var searchBox = new google.maps.places.SearchBox(input);
+
+    //map.addListener('bounds_changed', () => { searchBox.setBounds(map.getBounds()); });
+
+    searchBox.addListener('places_changed', () => {
+        var place = searchBox.getPlaces()[0];
+        console.log(place);
+
+        if (place) {
+            if(place.types.includes('country'))
+                loadCountryPeople(place.formatted_address, 10);
+
+            var bounds = new google.maps.LatLngBounds();
+
+            if (!place.geometry) return;
+            if (place.geometry.viewport)
+                bounds.union(place.geometry.viewport);
+            else
+                bounds.extend(place.geometry.location);
+            map.fitBounds(bounds);
+
+            // TODO : A retirer, juste pour marquer les points que l'on a cherches
+            var mark = new google.maps.Marker(
+                {
+                    position:{  lat:place.geometry.location.lat(),
+                                lng:place.geometry.location.lng()
+                            },
+                    map:map
+                }
+            );
+
+            var eq = {
+                //starttime   : ,
+                //endtime     : ,
+                //minmagnitude: ,
+                //maxmagnitude: ,
+                latitude: place.geometry.location.lat(),
+                longitude: place.geometry.location.lng(),
+                //minlatitude : ,
+                //minlongitude: ,
+                //maxlatitude : ,
+                //maxlongitude: ,
+                //maxradius   : ,
+                maxradiuskm : 5000
+            };
+            loadEarthquakeLayerBis(eq);
+
+            console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
+        }
+    });
+
+    /******* Seismes *******/
+
+    //loadEarthquakeLayer(null, null, 3.5, null, 46.227638, 2.213749, 1000);
+
+    map.data.setStyle(circleMagnitude);
+
+    var infoWindow = new google.maps.InfoWindow();
+
+    map.data.addListener('click', (event) =>    {
+                                                    infoWindow.setPosition(event.feature.getGeometry().get());
+                                                    infoWindow.setContent(getContent(event.feature));
+                                                    infoWindow.open(map);
+                                                    map.setCenter(event.feature.getGeometry().get());
+                                                    if(map.getZoom() < 5)
+                                                        map.setZoom(5);
+                                                });
+
+    map.addListener('click', () => {
+                                        infoWindow.close();
+                                        //map.setZoom(2);
+                                    });
+}
+
+
+
+/** Charge et affiche sur la carte les seismes correspondant au criteres suivants
+ * @param start Date de debut de la requete
+ * @param end   Date de fin de la requete
+ * @param min   Magnitude minimum du seisme
+ * @param max   Magnitude maximum du seisme
+ * @param lat   Latitude de recherche des seismes
+ * @param lng   Longitude de recherche des seismes
+ * @param rad   Rayon de recherche autour de la position donnee
+ * @param limit Nombre maximum de seismes a afficher
+ */
+function loadEarthquakeLayer(start = null, end = null, min = null, max = null, lat = null, lng = null, rad = null, limit = 100) {
+    var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
+    query += '&limit=' + limit;
+    if (start && end) //(start || end)
+        query += '&starttime=' + start + '&endtime=' + end;
+    if (min || max)
+        query += '&minmagnitude=' + min + '&maxmagnitude=' + max;
+    if (lat && lng) //(lat || lng)
+        query += '&latitude=' + lat + '&longitude='+ lng;
+    if (lat && lng && rad)
+        query += '&maxradiuskm=' + rad;
+
+    map.data.loadGeoJson(query);
+
+    console.log(query);
+}
+
+function loadEarthquakeLayerBis(eq, limit = 100) {
+
+    eraseEarthquakeLayer();
+
+    var zoneCarre = eq.minlatitude || eq.minlongitude || eq.maxlatitude || eq.maxlongitude;
+    var zoneCirculaire = eq.maxradius || eq.maxradiuskm;
+
+    if (zoneCirculaire && zoneCarre)
+        throw "Des parametres de definition d'une zone circulaire et d'une zone carree sont definis";
+
+    if (zoneCirculaire) {
+        if (eq.maxradius && eq.maxradiuskm) {
+            throw "maxradius et maxradiuskm ne peuvent pas etre specifiés tous les deux.";
+        }
+        if (!eq.latitude || !eq.longitude) {
+            throw "Il faut specifier la latitude et la longitude pour une zone circulaire.";
+        }
+    }
+
+    var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
+    query += '&limit=' + limit;
+
+    for (let key in eq) {
+        console.log(key);
+        query += '&' + key + '=' + eq[key];
+    }
+
+    map.data.loadGeoJson(query);
+
+    console.log(query);
+}
+
+
+/** Efface les seismes affiches sur la carte
+ */
+function eraseEarthquakeLayer() {
+    map.data.forEach(earthquake => {map.data.remove(earthquake);});
+}
+
+
 
 
 /** Recupere les informations sur un seisme et les renvoit sous sorme d'une chaine de caracteres
