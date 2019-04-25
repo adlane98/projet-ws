@@ -44,6 +44,10 @@
         padding-left: 12%;
     }
 
+    .bg-dark form label, .bg-dark form legend {
+        color: white;
+    }
+
     .my-padding {
         padding-left: 10%;
         padding-right: 10%;
@@ -85,39 +89,78 @@
         <div class="collapse" id="navbarToggleExternalContent">
             <div class="bg-dark" id="advancedSearch">
                 <form>
-                    <div class="form-group">
-                        <label for="exampleDropdownFormEmail2">Email address</label>
-                        <input type="email" class="form-control" id="exampleDropdownFormEmail2" placeholder="email@example.com">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="starttime">A partir du</label>
+                            <input type="date" class="form-control" id="starttime">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="endtime">Jusqu'au</label>
+                            <input type="date" class="form-control" id="endtime">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="exampleDropdownFormPassword2">Password</label>
-                        <input type="password" class="form-control" id="exampleDropdownFormPassword2" placeholder="Password">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="minmagnitude">Magnitude minimale</label>
+                            <input type="number" class="form-control" id="minmagnitude" placeholder="0" min="0" max="10">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="maxmagnitude">Magnitude maximale</label>
+                            <input type="number" class="form-control" id="maxmagnitude" placeholder="10" min="0" max="10">
+                        </div>
                     </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="dropdownCheck2">
-                        <label class="form-check-label" for="dropdownCheck2">
-                            Remember me
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Sign in</button>
+                    <fieldset class="form-group" id="rectanglearea">
+                        <div class="row">
+                            <legend class="col-form-label col-md-2 pt-0">Zone géographique rectangulaire</legend>
+                            <div class="col-md-10">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="minlongitude">Longitude minimale</label>
+                                        <input type="number" class="form-control" id="minlongitude" placeholder="0" min="-180" max="180" step="any">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="maxlongitude">Longitude maximale</label>
+                                        <input type="number" class="form-control" id="maxlongitude" placeholder="0" min="-180" max="180" step="any">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="minlatitude">Latitude minimale</label>
+                                        <input type="number" class="form-control" id="minlatitude" placeholder="0" min="-90" max="90" step="any">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="maxlatitude">Latitude maximale</label>
+                                        <input type="number" class="form-control" id="maxlatitude" placeholder="0" min="-90" max="90" step="any">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-group" id="circlearea">
+                        <div class="row">
+                            <legend class="col-form-label col-md-2 pt-0">Zone géographique circulaire</legend>
+                            <div class="col-md-10">
+                                <div class="row">
+                                    <div class="form-group col-md-4">
+                                        <label for="longitude">Longitude du centre</label>
+                                        <input type="number" class="form-control" id="longitude" placeholder="0" min="-180" max="180" step="any">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="latitude">Latitude du centre</label>
+                                        <input type="number" class="form-control" id="latitude" placeholder="0" min="-90" max="90" step="any">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="radius">Rayon du cercle en kilomètres</label>
+                                        <input type="number" class="form-control" id="radius" placeholder="5000" min="0" max="20001.6" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </fieldset>
                 </form>
             </div>
         </div>
     </header>
-
-
-    <div class="container collapse" id="collapseExemple">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-body">
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <main role="main">
         <div class="album py-5 bg-light">
@@ -160,6 +203,48 @@
     </footer>
     <script src="modele/jquery-3.js"></script>
     <script>window.jQuery || document.write('<script src="/docs/4.3/assets/js/vendor/jquery-slim.min.js"><\/script>')</script><script src="bootstrap-4.3.1-dist/js/bootstrap.js"></script>
+
+    <script>
+        var date = new Date();
+
+        var day = date.getDate();
+        var month = date.getMonth() + 1;
+        var year = date.getFullYear();
+
+        if (month < 10) month = "0" + month;
+        if (day < 10) day = "0" + day;
+
+        var today = year + "-" + month + "-" + day;
+        document.getElementById("endtime").value = today;
+    </script>
+
+    <script>
+        var ca = document.getElementById("circlearea");
+        ca.addEventListener("click", () => {
+            document.getElementById("latitude").disabled = false;
+            document.getElementById("longitude").disabled = false;
+            document.getElementById("radius").disabled = false;
+
+            document.getElementById("minlatitude").disabled = true;
+            document.getElementById("maxlatitude").disabled = true;
+            document.getElementById("minlongitude").disabled = true;
+            document.getElementById("maxlongitude").disabled = true;
+        });
+
+        var ra = document.getElementById("rectanglearea");
+        ra.addEventListener("click", () => {
+            document.getElementById("minlatitude").disabled = false;
+            document.getElementById("maxlatitude").disabled = false;
+            document.getElementById("minlongitude").disabled = false;
+            document.getElementById("maxlongitude").disabled = false;
+
+            document.getElementById("latitude").disabled = true;
+            document.getElementById("longitude").disabled = true;
+            document.getElementById("radius").disabled = true;
+        });
+    </script>
+
+
 
 </body>
 </html>

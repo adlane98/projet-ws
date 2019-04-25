@@ -1,6 +1,5 @@
 var map;
 
-
 /*function Earthquake(starttime = null,   endtime = null,
                     minmagnitude = null, maxmagnitude = null,
                     minlatitude = null, minlongitude = null,
@@ -134,7 +133,7 @@ function mapInitialisation() {
                 //maxradius   : ,
                 maxradiuskm : 5000
             };
-            
+
             loadEarthquakeLayerBis(eq);
 
             console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
