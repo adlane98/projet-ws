@@ -66,6 +66,44 @@ function circleMagnitude(earthquake) {
     };
 }
 
+function putEarthquake(place) {
+    var bounds = new google.maps.LatLngBounds();
+
+    if (!place.geometry) return;
+    if (place.geometry.viewport)
+        bounds.union(place.geometry.viewport);
+    else
+        bounds.extend(place.geometry.location);
+    map.fitBounds(bounds);
+
+    // TODO : A retirer, juste pour marquer les points que l'on a cherches
+    var mark = new google.maps.Marker(
+        {
+            position:{  lat:place.geometry.location.lat(),
+                        lng:place.geometry.location.lng()
+                    },
+            map:map
+        }
+    );
+
+    var eq = {
+        //starttime   : ,
+        //endtime     : ,
+        //minmagnitude: ,
+        //maxmagnitude: ,
+        latitude: place.geometry.location.lat(),
+        longitude: place.geometry.location.lng(),
+        //minlatitude : ,
+        //minlongitude: ,
+        //maxlatitude : ,
+        //maxlongitude: ,
+        //maxradius   : ,
+        maxradiuskm : 3000
+    };
+    loadEarthquakeLayerBis(eq);
+    console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
+}
+
 
 /** Initialise la carte et ajoute les gestionnaires d'evenements
  */
@@ -92,53 +130,33 @@ function mapInitialisation() {
 
     //map.addListener('bounds_changed', () => { searchBox.setBounds(map.getBounds()); });
 
-    searchBox.addListener('places_changed', () => {
+    function earthquakeResearchButton(location) {
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({'address':location}, function (data, status) {
+            putEarthquake(data[0]);
+        });
+    }
+
+    function earthquakeResearch() {
         var place = searchBox.getPlaces()[0];
-        console.log(place);
+        console.log("input = " + input.value);
+        console.log("searchBox = " + searchBox);
+        console.log("place = " + place);
 
         if (place) {
             if(place.types.includes('country'))
                 loadCountryPeople(place.formatted_address, 10);
-
-            var bounds = new google.maps.LatLngBounds();
-
-            if (!place.geometry) return;
-            if (place.geometry.viewport)
-                bounds.union(place.geometry.viewport);
-            else
-                bounds.extend(place.geometry.location);
-            map.fitBounds(bounds);
-
-            // TODO : A retirer, juste pour marquer les points que l'on a cherches
-            var mark = new google.maps.Marker(
-                {
-                    position:{  lat:place.geometry.location.lat(),
-                                lng:place.geometry.location.lng()
-                            },
-                    map:map
-                }
-            );
-
-            var eq = {
-                //starttime   : ,
-                //endtime     : ,
-                //minmagnitude: ,
-                //maxmagnitude: ,
-                latitude: place.geometry.location.lat(),
-                longitude: place.geometry.location.lng(),
-                //minlatitude : ,
-                //minlongitude: ,
-                //maxlatitude : ,
-                //maxlongitude: ,
-                //maxradius   : ,
-                maxradiuskm : 5000
-            };
-
-            loadEarthquakeLayerBis(eq);
-
-            console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
+            putEarthquake(place);
         }
-    });
+    }
+
+    searchBox.addListener('places_changed', earthquakeResearch);
+
+    document.getElementById('searchButton').onclick = () => {
+        var location = input.value;
+        console.log(location);
+        earthquakeResearchButton(location);
+    };
 
     /******* Seismes *******/
 

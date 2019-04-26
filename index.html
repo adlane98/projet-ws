@@ -75,9 +75,9 @@
                     <img src="logo-earthquake-white.png" width="30" height="30" alt="logo-site">
                     <strong>Earthquake viewer</strong>
                 </a>
-                <form class="form-inline flex-grow-1 searchbar-margin">
+                <form class="form-inline flex-grow-1 searchbar-margin" id="searchForm">
                     <input class="form-control mr-sm-2 flex-grow-1" type="search" placeholder="Search" aria-label="Search" id="searchBox">
-                    <button class="btn btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
+                    <button class="btn btn btn-outline-light my-2 my-sm-0" id="searchButton" type="button">Search</button>
                 </form>
                 <div class="dropdown">
                     <button class="btn" type="button" id="dropdownMenu2" data-toggle="collapse" data-target="#navbarToggleExternalContent">
@@ -88,7 +88,7 @@
         </nav>
         <div class="collapse" id="navbarToggleExternalContent">
             <div class="bg-dark" id="advancedSearch">
-                <form>
+                <form id="advancedSearchForm">
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="starttime">A partir du</label>
