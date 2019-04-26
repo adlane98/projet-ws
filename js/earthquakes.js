@@ -158,6 +158,37 @@ function mapInitialisation() {
         earthquakeResearchButton(location);
     };
 
+    /******* Recherche avancee *******/
+    var advancedSearchButton = document.getElementById('advancedSearchButton');
+    advancedSearchButton.onclick = () => {
+        var eq = {
+            starttime   : parseDate(document.getElementById("starttime").value),
+            endtime     : parseDate(document.getElementById("endtime").value),
+            minmagnitude: parseFloat(document.getElementById("minmagnitude").value),
+            maxmagnitude: parseFloat(document.getElementById("maxmagnitude").value)
+        }
+
+        var circleEnable = !document.getElementById("latitude").disabled;
+        var rectEnable = !document.getElementById("minlatitude").disabled;
+
+        if (circleEnable && rectEnable) {
+            throw "Selections des deux facons de rechercher."
+        }
+        else if (circleEnable) {
+            eq.latitude = parseFloat(document.getElementById("latitude").value);
+            eq.longitude = parseFloat(document.getElementById("longitude").value);
+            eq.maxradiuskm = parseFloat(document.getElementById("maxradiuskm").value);
+        }
+        else if (rectEnable) {
+            eq.minlatitude = parseFloat(document.getElementById("minlatitude").value);
+            eq.minlongitude = parseFloat(document.getElementById("minlongitude").value);
+            eq.maxlatitude = parseFloat(document.getElementById("maxlatitude").value);
+            eq.maxlongitude = parseFloat(document.getElementById("maxlongitude").value);
+        }
+
+        console.log(eq);
+    }
+
     /******* Seismes *******/
 
     //loadEarthquakeLayer(null, null, 3.5, null, 46.227638, 2.213749, 1000);
@@ -257,7 +288,7 @@ function eraseEarthquakeLayer() {
  */
 function getContent(earthquake) {
     return '<span style="color:red">' + earthquake.getProperty('place') + '</span></br>'
-         + 'Date: ' + parseDate(earthquake.getProperty('time')) + '</br>'
+         + 'Date: ' + parseDate2(earthquake.getProperty('time')) + '</br>'
          + 'Magnitude: ' + earthquake.getProperty('mag') + '</br>'
          + '<a href="' + earthquake.getProperty('url') + '" target="_blank">Details</a>';
 }
@@ -267,8 +298,10 @@ function getContent(earthquake) {
  * @param date Un nombre de secondes
  * @return La date correspondante au format UTC
  */
-function parseDate(date) {
+function parseDate2(date) {
+    console.log(date);
     var temps = new Date();
     temps.setTime(date);
+    console.log(temps.toUTCString());
     return temps.toUTCString();
 }

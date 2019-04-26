@@ -37,11 +37,30 @@
         height: 100%;
     }
 
+    #labelZone {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid white;
+        border-radius: 10px;
+        text-align: center;
+        justify-content: center;
+    }
+
     #advancedSearch {
         padding-top: 1%;
         padding-right: 12%;
         padding-bottom: 3%;
         padding-left: 12%;
+    }
+
+    #rowarearect {
+        margin-left: 4px;
+        margin-right: -10px;
+    }
+
+    #rowareacirc {
+        margin-left: -1px;
+        margin-right: -14px;
     }
 
     .bg-dark form label, .bg-dark form legend {
@@ -109,26 +128,26 @@
                             <input type="number" class="form-control" id="maxmagnitude" placeholder="10" min="0" max="10">
                         </div>
                     </div>
-                    <fieldset class="form-group" id="rectanglearea">
-                        <div class="row">
-                            <legend class="col-form-label col-md-2 pt-0">Zone géographique rectangulaire</legend>
+                    <fieldset class="form-group form-row" id="rectanglearea">
+                        <div class="row" id="rowarearect">
+                            <legend class="col-form-label col-md-2 pt-0" id="labelZone"><div>Zone géographique rectangulaire</div></legend>
                             <div class="col-md-10">
-                                <div class="row">
+                                <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label for="minlongitude">Longitude minimale</label>
-                                        <input type="number" class="form-control" id="minlongitude" placeholder="0" min="-180" max="180" step="any">
+                                        <input type="number" class="form-control" id="minlongitude" min="-180" max="180" step="any">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="maxlongitude">Longitude maximale</label>
-                                        <input type="number" class="form-control" id="maxlongitude" placeholder="0" min="-180" max="180" step="any">
+                                        <input type="number" class="form-control" id="maxlongitude" min="-180" max="180" step="any">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="minlatitude">Latitude minimale</label>
-                                        <input type="number" class="form-control" id="minlatitude" placeholder="0" min="-90" max="90" step="any">
+                                        <input type="number" class="form-control" id="minlatitude" min="-90" max="90" step="any">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="maxlatitude">Latitude maximale</label>
-                                        <input type="number" class="form-control" id="maxlatitude" placeholder="0" min="-90" max="90" step="any">
+                                        <input type="number" class="form-control" id="maxlatitude" min="-90" max="90" step="any">
                                     </div>
                                 </div>
                             </div>
@@ -136,8 +155,8 @@
                     </fieldset>
 
                     <fieldset class="form-group" id="circlearea">
-                        <div class="row">
-                            <legend class="col-form-label col-md-2 pt-0">Zone géographique circulaire</legend>
+                        <div class="row" id="rowareacirc">
+                            <legend class="col-form-label col-md-2 pt-0" id="labelZone">Zone géographique circulaire</legend>
                             <div class="col-md-10">
                                 <div class="row">
                                     <div class="form-group col-md-4">
@@ -149,14 +168,15 @@
                                         <input type="number" class="form-control" id="latitude" placeholder="0" min="-90" max="90" step="any">
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label for="radius">Rayon du cercle en kilomètres</label>
-                                        <input type="number" class="form-control" id="radius" placeholder="5000" min="0" max="20001.6" step="0.1">
+                                        <label for="maxradiuskm">Rayon du cercle en kilomètres</label>
+                                        <input type="number" class="form-control" id="maxradiuskm" placeholder="5000" min="0" max="20001.6" step="0.1">
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success">Submit</button>
+
                     </fieldset>
+                    <button type="button" id="advancedSearchButton" class="btn btn-success">Submit</button>
                 </form>
             </div>
         </div>
@@ -219,11 +239,20 @@
     </script>
 
     <script>
+        document.getElementById("latitude").disabled = true;
+        document.getElementById("longitude").disabled = true;
+        document.getElementById("maxradiuskm").disabled = true;
+
+        document.getElementById("minlatitude").disabled = true;
+        document.getElementById("maxlatitude").disabled = true;
+        document.getElementById("minlongitude").disabled = true;
+        document.getElementById("maxlongitude").disabled = true;
+
         var ca = document.getElementById("circlearea");
         ca.addEventListener("click", () => {
             document.getElementById("latitude").disabled = false;
             document.getElementById("longitude").disabled = false;
-            document.getElementById("radius").disabled = false;
+            document.getElementById("maxradiuskm").disabled = false;
 
             document.getElementById("minlatitude").disabled = true;
             document.getElementById("maxlatitude").disabled = true;
@@ -240,7 +269,7 @@
 
             document.getElementById("latitude").disabled = true;
             document.getElementById("longitude").disabled = true;
-            document.getElementById("radius").disabled = true;
+            document.getElementById("maxradiuskm").disabled = true;
         });
     </script>
 
