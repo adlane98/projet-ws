@@ -162,10 +162,10 @@ function mapInitialisation() {
     var advancedSearchButton = document.getElementById('advancedSearchButton');
     advancedSearchButton.onclick = () => {
         var eq = {
-            starttime   : parseDate(document.getElementById("starttime").value),
-            endtime     : parseDate(document.getElementById("endtime").value),
-            minmagnitude: parseFloat(document.getElementById("minmagnitude").value),
-            maxmagnitude: parseFloat(document.getElementById("maxmagnitude").value)
+            starttime   : document.getElementById("starttime").value,
+            endtime     : document.getElementById("endtime").value,
+            minmagnitude: strToFloat(document.getElementById("minmagnitude").value),
+            maxmagnitude: strToFloat(document.getElementById("maxmagnitude").value),
         }
 
         var circleEnable = !document.getElementById("latitude").disabled;
@@ -175,18 +175,20 @@ function mapInitialisation() {
             throw "Selections des deux facons de rechercher."
         }
         else if (circleEnable) {
-            eq.latitude = parseFloat(document.getElementById("latitude").value);
-            eq.longitude = parseFloat(document.getElementById("longitude").value);
-            eq.maxradiuskm = parseFloat(document.getElementById("maxradiuskm").value);
+            eq.latitude = strToFloat(document.getElementById("latitude").value);
+            eq.longitude = strToFloat(document.getElementById("longitude").value);
+            eq.maxradiuskm = strToFloat(document.getElementById("maxradiuskm").value);
         }
         else if (rectEnable) {
-            eq.minlatitude = parseFloat(document.getElementById("minlatitude").value);
-            eq.minlongitude = parseFloat(document.getElementById("minlongitude").value);
-            eq.maxlatitude = parseFloat(document.getElementById("maxlatitude").value);
-            eq.maxlongitude = parseFloat(document.getElementById("maxlongitude").value);
+            eq.minlatitude = strToFloat(document.getElementById("minlatitude").value);
+            eq.minlongitude = strToFloat(document.getElementById("minlongitude").value);
+            eq.maxlatitude = strToFloat(document.getElementById("maxlatitude").value);
+            eq.maxlongitude = strToFloat(document.getElementById("maxlongitude").value);
         }
+        var limit = strToInt(document.getElementById("limit").value);
 
         console.log(eq);
+        limit == null ? loadEarthquakeLayerBis(eq) : loadEarthquakeLayerBis(eq, limit);  
     }
 
     /******* Seismes *******/
@@ -264,7 +266,7 @@ function loadEarthquakeLayerBis(eq, limit = 100) {
 
     for (let key in eq) {
         console.log(key);
-        query += '&' + key + '=' + eq[key];
+        if (eq[key] != null) query += '&' + key + '=' + eq[key];
     }
 
     map.data.loadGeoJson(query);
@@ -304,4 +306,15 @@ function parseDate2(date) {
     temps.setTime(date);
     console.log(temps.toUTCString());
     return temps.toUTCString();
+}
+
+
+function strToInt(num) {
+    if (num.length == 0) return null;
+    else return parseInt(num);
+}
+
+function strToFloat(num) {
+    if (num.length == 0) return null;
+    else return parseFloat(num);
 }
