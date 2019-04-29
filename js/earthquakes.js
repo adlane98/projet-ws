@@ -1,35 +1,5 @@
 var map;
 
-/*function Earthquake(starttime = null,   endtime = null,
-                    minmagnitude = null, maxmagnitude = null,
-                    minlatitude = null, minlongitude = null,
-                    maxlatitude = null, maxlongitude = null,
-                    latitude = null,    longitude = null,
-                    maxradius = null,   maxradiuskm = null) {
-    //Savoir quelle type de zone est definie
-    var zoneCarre = minlatitude || minlongitude || maxlatitude || maxlongitude;
-    var zoneCirculaire = maxradius || maxradiuskm;
-
-    if (zoneCirculaire) {
-        if (maxradius && maxradiuskm) {
-            throw "maxradius et maxradiuskm ne peuvent pas etre specifiés tous les deux.";
-        }
-        if (!latitude || !longitude) {
-            throw "Il faut specifier la latitude et la longitude pour une zone circulaire.";
-        }
-    }
-
-    if (starttime)      this.starttime      = starttime;
-    if (endtime)        this.endtime        = endtime;
-    if (minmagnitude)   this.minmagnitude   = minmagnitude;
-    if (maxmagnitude)   this.maxmagnitude   = maxmagnitude;
-    if (minlatitude)    this.minlatitude    = minlatitude;
-    if (minlongitude)   this.minlongitude   = minlongitude;
-    if (maxlatitude)    this.maxlatitude    = maxlatitude;
-    if (maxlongitude)   this.maxlongitude   = maxlongitude;
-    if (maxradius)      this.maxradius      = maxradius;
-    if (maxradiuskm)    this.maxradiuskm    = maxradiuskm;
-}*/
 
 /** Recupere le marqueur (cercle) correspondant a un seisme
  * @param earthquake Le seisme a marquer
@@ -128,8 +98,6 @@ function mapInitialisation() {
     var input = document.getElementById('searchBox');
     var searchBox = new google.maps.places.SearchBox(input);
 
-    //map.addListener('bounds_changed', () => { searchBox.setBounds(map.getBounds()); });
-
     function earthquakeResearchButton(location) {
         var geocoder = new google.maps.Geocoder();
         geocoder.geocode({'address':location}, function (data, status) {
@@ -139,14 +107,31 @@ function mapInitialisation() {
 
     function earthquakeResearch() {
         var place = searchBox.getPlaces()[0];
-        console.log("input = " + input.value);
-        console.log("searchBox = " + searchBox);
-        console.log("place = " + place);
 
         if (place) {
             if(place.types.includes('country'))
                 loadCountryPeople(place.formatted_address, 10);
             putEarthquake(place);
+            var lookUpDBpediaQuery = "http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?&QueryString=" + input.value;
+            console.log(lookUpDBpediaQuery);
+            var req = new XMLHttpRequest();
+            req.open("GET", lookUpDBpediaQuery, false);
+            req.send(null); // Quand il n'y a pas de resultats, la longueur du resultat est de 216
+            var responseLen = req.responseText.length;
+            if (responseLen <= 216) { // Si pas de resultats, on recupere le premier mot de l'input
+                var cleanInput = input.value.split(" ")[0];
+                lookUpDBpediaQuery = "http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?&QueryString=" + cleanInput;
+                req = new XMLHttpRequest();
+                req.open("GET", lookUpDBpediaQuery, false);
+                req.send(null); // Quand il n'y a pas de resultats, la longueur du resultat est de 216
+                if (req.responseText.length <= 216) {
+                    console.log("Rien trouve pour ce lieu");
+                }
+            }
+            console.log(req.responseText);
+            console.log(req.responseText.length);
+            // On recupere l'URI
+            console.log(req.responseText.getElementsByTagName("URI"));
         }
     }
 
@@ -172,7 +157,7 @@ function mapInitialisation() {
         var rectEnable = !document.getElementById("minlatitude").disabled;
 
         if (circleEnable && rectEnable) {
-            throw "Selections des deux facons de rechercher."
+            throw "Selections des deux facons de rechercher.";
         }
         else if (circleEnable) {
             eq.latitude = strToFloat(document.getElementById("latitude").value);
@@ -186,19 +171,14 @@ function mapInitialisation() {
             eq.maxlongitude = strToFloat(document.getElementById("maxlongitude").value);
         }
         var limit = strToInt(document.getElementById("limit").value);
-
-        console.log(eq);
-        limit == null ? loadEarthquakeLayerBis(eq) : loadEarthquakeLayerBis(eq, limit);  
+        limit == null ? loadEarthquakeLayerBis(eq) : loadEarthquakeLayerBis(eq, limit);
     }
 
     /******* Seismes *******/
 
-    //loadEarthquakeLayer(null, null, 3.5, null, 46.227638, 2.213749, 1000);
-
     map.data.setStyle(circleMagnitude);
 
     var infoWindow = new google.maps.InfoWindow();
-
     map.data.addListener('click', (event) =>    {
                                                     infoWindow.setPosition(event.feature.getGeometry().get());
                                                     infoWindow.setContent(getContent(event.feature));
@@ -270,7 +250,6 @@ function loadEarthquakeLayerBis(eq, limit = 100) {
     }
 
     map.data.loadGeoJson(query);
-
     console.log(query);
 }
 
@@ -280,9 +259,6 @@ function loadEarthquakeLayerBis(eq, limit = 100) {
 function eraseEarthquakeLayer() {
     map.data.forEach(earthquake => {map.data.remove(earthquake);});
 }
-
-
-
 
 /** Recupere les informations sur un seisme et les renvoit sous sorme d'une chaine de caracteres
  * @param earthquake Le seisme dont on veut recuperer les informations
