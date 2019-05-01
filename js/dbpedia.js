@@ -1,12 +1,17 @@
-function makeRequest(query, callback) {
-    var request = 'http://dbpedia.org/sparql?default-graph-uri=&query='
-                + encodeURIComponent(query).replace(/'/g,"%27").replace(/"/g,"%22")
-                + '&format=application%2Fsparql-results%2Bjson';
-
+function makeRequest(request, callback) {
+    console.log("Requete envoyee : " + request);
     var xhr = new XMLHttpRequest();
     xhr.open("GET", request, true);
     xhr.send(null);
     xhr.addEventListener("load", callback);
+}
+
+function makeRequestDBpedia(query, callback) {
+    var request = 'http://dbpedia.org/sparql?default-graph-uri=&query='
+                + encodeURIComponent(query).replace(/'/g,"%27").replace(/"/g,"%22")
+                + '&format=application%2Fsparql-results%2Bjson';
+
+    makeRequest(request, callback);
 }
 
 
@@ -32,7 +37,7 @@ function loadCountryPeople(country, nb = 10) {
                   +     "FILTER(LANG(?name)='en' && LANG(?desc)='en' && REGEX(?countryName, '" + country + "', 'i')) ."
                   + '} LIMIT ' + nb;
 
-        makeRequest(query, peopleCallback);
+        makeRequestDBpedia(query, peopleCallback);
     }
 }
 
@@ -57,7 +62,7 @@ function loadCountryInfo(country) {
                   +              'rdfs:label ?countryName .'
                   + '} LIMIT 1';
 
-        makeRequest(query, infoCallback);
+        makeRequestDBpedia(query, infoCallback);
     }
 }
 

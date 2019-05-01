@@ -112,13 +112,29 @@ function mapInitialisation() {
             if(place.types.includes('country'))
                 loadCountryPeople(place.formatted_address, 10);
             putEarthquake(place);
-            var lookUpDBpediaQuery = "http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?&QueryString=" + input.value;
+
+            //Traduction du texte rentre en anglais
+            var request = 'https://translation.googleapis.com/language/translate/v2?target=en&key='
+                        + "AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE"
+                        + "&q="
+                        + encodeURIComponent(input.value).replace(/'/g,"%27").replace(/"/g,"%22");
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", request, false);
+            xhr.send(null);
+            console.log(request);
+            var keywords = input.value;
+            try {
+                keywords = JSON.parse(xhr.responseText).data.translations[0].translatedText
+            } catch {
+            }
+            var lookUpDBpediaQuery = "http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?&QueryString=" + keywords;
             console.log(lookUpDBpediaQuery);
             var req = new XMLHttpRequest();
             req.open("GET", lookUpDBpediaQuery, false);
             req.send(null); // Quand il n'y a pas de resultats, la longueur du resultat est de 216
             var responseLen = req.responseText.length;
             if (responseLen <= 216) { // Si pas de resultats, on recupere le premier mot de l'input
+                                        // Si input.value = "Saint-Ouen, France", on recupere "Saint-Ouen"
                 var cleanInput = input.value.split(" ")[0];
                 lookUpDBpediaQuery = "http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?&QueryString=" + cleanInput;
                 req = new XMLHttpRequest();
@@ -126,12 +142,98 @@ function mapInitialisation() {
                 req.send(null); // Quand il n'y a pas de resultats, la longueur du resultat est de 216
                 if (req.responseText.length <= 216) {
                     console.log("Rien trouve pour ce lieu");
+                    return; // On sort de la fonction si on a rien trouve TODO : Afficher "rien trouver" sur la page
                 }
             }
             console.log(req.responseText);
             console.log(req.responseText.length);
+
             // On recupere l'URI
-            console.log(req.responseText.getElementsByTagName("URI"));
+            var xmlparser = new DOMParser();
+            var xmldoc = xmlparser.parseFromString(req.responseText, "text/xml");
+            // On recherche le premier URI qui a comme type "place"
+            var isplace = false;
+            var results = xmldoc.getElementsByTagName("Result");
+            var index = 0;
+            console.log(results.length);
+            for (i = 0; i < results.length && !isplace; i++) {
+                var classes = results[i].children[3].children // On recupere les classes qui sont des types de l'URI recherchee "<Classes>" : indice 3
+                if (classes.length == 0) isplace = true; // S'il n'y a rien dans les types alors on considere que c'est un lieu
+                for (j = 0; j < classes.length && !isplace; j++) {
+                    isplace = (classes[j].children[0].innerHTML == "place");
+                    if (isplace) index = i;
+                }
+            }
+            console.log(isplace);
+            if (isplace) {
+                var queryURI = results[index].children[1].innerHTML; //"<URI>" :  indice 1
+                console.log(queryURI);
+            }
+
+            //On lance la requete
+            /*select distinct ?name, ?countryName, ?superficie, ?population, ?currencyName, ?langueName where {
+
+OPTIONAL { <http://dbpedia.org/resource/Algeria> rdfs:label ?name. FILTER langMatches( lang(?name), "FR" ) }
+OPTIONAL { <http://dbpedia.org/resource/Algeria> rdfs:label ?name. FILTER langMatches( lang(?name), "EN" ) }
+
+
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:country ?country.
+?country rdfs:label ?countryName. FILTER langMatches( lang(?countryName), "FR")
+}
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:country ?country.
+?country rdfs:label ?countryName. FILTER langMatches( lang(?countryName), "EN")
+}
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbp:region ?region.
+?region dbo:country ?country.
+?country rdfs:label ?countryName. FILTER langMatches( lang(?countryName), "FR")
+}
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbp:region ?region.
+?region dbo:country ?country.
+?country rdfs:label ?countryName. FILTER langMatches( lang(?countryName), "EN")
+}
+
+#Superficie
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:PopulatedPlace ?superficie.
+}
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:areaTotal ?superficie.
+}
+
+#Population
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:populationTotal ?population.
+}
+
+
+
+#Specifique a un pays :
+#Devise
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:currency ?devise.
+?devise rdfs:label ?currencyName. FILTER langMatches( lang(?currencyName), "FR")
+}
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:currency ?devise.
+?devise rdfs:label ?currencyName. FILTER langMatches( lang(?currencyName), "EN")
+}
+
+#Langue
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:language ?langue.
+?langue rdfs:label ?langueName. FILTER langMatches( lang(?langueName), "FR")
+}
+OPTIONAL {
+<http://dbpedia.org/resource/Algeria> dbo:language ?langue.
+?langue rdfs:label ?langueName. FILTER langMatches( lang(?langueName), "EN")
+}
+
+} LIMIT 100*/
+
         }
     }
 
