@@ -109,10 +109,13 @@ function mapInitialisation() {
         var place = searchBox.getPlaces()[0];
 
         if (place) {
-            if(place.types.includes('country'))
-                loadCountryPeople(place.formatted_address, 10);
             putEarthquake(place);
-
+            var searchInfoTitle = document.getElementById("searchInfoTitle");
+            var searchInfoContents = document.getElementById("searchInfoContents");
+            var videoLinksContents = document.getElementById("videoLinksContents");
+            searchInfoTitle.innerHTML = "";
+            searchInfoContents.innerHTML = "";
+            videoLinksContents.innerHTML = "";
             //Traduction du texte rentre en anglais
             var request = 'https://translation.googleapis.com/language/translate/v2?target=en&key='
                         + "AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE"
@@ -151,7 +154,7 @@ function mapInitialisation() {
             // On recupere l'URI
             var xmlparser = new DOMParser();
             var xmldoc = xmlparser.parseFromString(req.responseText, "text/xml");
-            // On recherche le premier URI qui a comme type "place"
+            // On recherche le premier URI qui a comme type la classe "place". On determine si ce que l'on trouve est bien un lieu.
             var isplace = false;
             var results = xmldoc.getElementsByTagName("Result");
             var index = 0;
@@ -164,76 +167,20 @@ function mapInitialisation() {
                     if (isplace) index = i;
                 }
             }
-            console.log(isplace);
             if (isplace) {
                 var queryURI = results[index].children[1].innerHTML; //"<URI>" :  indice 1
                 console.log(queryURI);
+                //On lance la requete et l'affichage
+                var peopleRes;
+                var infoRes;
+                if(place.types.includes('country')) {
+                    loadCountryPeople(place.formatted_address, 10);
+                    loadCountryInfo(queryURI);
+                }
+                else
+                    loadPlaceInfo(queryURI);
+                youtubeRequest(input.value);
             }
-
-            //On lance la requete
-            /*select distinct ?name, ?countryName, ?superficie, ?population, ?currencyName, ?langueName where {
-
-OPTIONAL { <http://dbpedia.org/resource/Algeria> rdfs:label ?name. FILTER langMatches( lang(?name), "FR" ) }
-OPTIONAL { <http://dbpedia.org/resource/Algeria> rdfs:label ?name. FILTER langMatches( lang(?name), "EN" ) }
-
-
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:country ?country.
-?country rdfs:label ?countryName. FILTER langMatches( lang(?countryName), "FR")
-}
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:country ?country.
-?country rdfs:label ?countryName. FILTER langMatches( lang(?countryName), "EN")
-}
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbp:region ?region.
-?region dbo:country ?country.
-?country rdfs:label ?countryName. FILTER langMatches( lang(?countryName), "FR")
-}
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbp:region ?region.
-?region dbo:country ?country.
-?country rdfs:label ?countryName. FILTER langMatches( lang(?countryName), "EN")
-}
-
-#Superficie
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:PopulatedPlace ?superficie.
-}
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:areaTotal ?superficie.
-}
-
-#Population
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:populationTotal ?population.
-}
-
-
-
-#Specifique a un pays :
-#Devise
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:currency ?devise.
-?devise rdfs:label ?currencyName. FILTER langMatches( lang(?currencyName), "FR")
-}
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:currency ?devise.
-?devise rdfs:label ?currencyName. FILTER langMatches( lang(?currencyName), "EN")
-}
-
-#Langue
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:language ?langue.
-?langue rdfs:label ?langueName. FILTER langMatches( lang(?langueName), "FR")
-}
-OPTIONAL {
-<http://dbpedia.org/resource/Algeria> dbo:language ?langue.
-?langue rdfs:label ?langueName. FILTER langMatches( lang(?langueName), "EN")
-}
-
-} LIMIT 100*/
-
         }
     }
 
