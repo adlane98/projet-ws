@@ -18,7 +18,6 @@
     </script>
     <script src="js/earthquakes.js"></script>
     <script src="js/dbpedia.js"></script>
-    <script src="js/youtube.js"></script>
     <script src="bootstrap-4.3.1-dist/js/bootstrap.bundle.js"></script>
 
     <style>
@@ -228,18 +227,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6" id="videoZone" hidden>
-                        <div class="card mb-4 shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="50" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
-                            <div class="card-body">
-                                <p class="card-text">
-                                </p>
-                            </div>
+                    <div class="col-md-9" id="videoZone">
+                        <div id="player">
                         </div>
+                        <script src="js/youtube.js" id="videoZoneScript"></script>
                     </div>
-                    <div class="col-md-3" id="peopleResultsZone" hidden>
+                    <div class="col-md-12" id="peopleResultsZone" hidden>
                         <div class="card mb-4 shadow-sm">
-                            <svg class="bd-placeholder-img card-img-top" width="100%" height="50" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text id="searchpeopleTitle" x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+                            <svg class="bd-placeholder-img card-img-top" width="100%" height="50" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Personalités</text></svg>
                             <div class="card-body">
                                 <p class="card-text">
                                     <ul class="list-group list-group-flush" id="peopleResultsContents">
@@ -250,7 +245,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 

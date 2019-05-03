@@ -113,9 +113,11 @@ function mapInitialisation() {
             var searchInfoTitle = document.getElementById("searchInfoTitle");
             var searchInfoContents = document.getElementById("searchInfoContents");
             var videoLinksContents = document.getElementById("videoLinksContents");
+            var peopleResultsContents = document.getElementById("peopleResultsContents");
             searchInfoTitle.innerHTML = "";
             searchInfoContents.innerHTML = "";
             videoLinksContents.innerHTML = "";
+            peopleResultsContents.innerHTML = "";
             //Traduction du texte rentre en anglais
             var request = 'https://translation.googleapis.com/language/translate/v2?target=en&key='
                         + "AIzaSyCvM8ENjaBYUOERtQEhlcfFGOxF8T248CE"

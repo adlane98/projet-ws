@@ -1,6 +1,7 @@
 var infoResults;
 var peopleResults;
 var titleFields = {"countryName": "Pays", "superficie": "Superficie", "population": "Population", "currencyName": "Devise", "langueName": "Languages"}
+var peopleFields = {"name": "Nom", "desc": "Description"};
 
 function makeRequest(request, callback) {
     console.log("Requete envoyee : " + request);
@@ -38,7 +39,7 @@ function loadCountryPeople(country, nb = 10) {
                   +             'rdfs:label ?name .'
                   +     '?country a dbpedia-owl:Country ;'
                   +              'rdfs:label ?countryName .'
-                  +     "FILTER(LANG(?name)='en' && LANG(?desc)='en' && REGEX(?countryName, '" + country + "', 'i')) ."
+                  +     "FILTER(LANG(?name)='fr' && LANG(?desc)='fr' && REGEX(?countryName, '" + country + "', 'i')) ."
                   + '} LIMIT ' + nb;
 
         makeRequestDBpedia(query, peopleCallback);
@@ -46,10 +47,28 @@ function loadCountryPeople(country, nb = 10) {
 }
 
 function peopleCallback() {
-    try{peopleResults = JSON.parse(this.responseText).results.bindings;}
+    try{results = JSON.parse(this.responseText).results.bindings;}
     catch{}
     console.log("people call back");
-    console.log(peopleResults); // TODO: traiter les resultats de la requete
+    console.log(results); // TODO: traiter les resultats de la requete
+
+    var peopleResultsZone = document.getElementById("peopleResultsZone");
+    var prz = document.getElementById("peopleResultsZone");
+    prz.hidden = false;
+
+    //On recupere le contenu sous forme d'un tableau d'ensembles pour eviter les doublons
+    var contents = new Object();
+    for (var key in peopleFields) {
+        var resultsSet = new Set();
+        for (var i = 0; i < results.length; i++) {
+            if (results[i][key]) resultsSet.add(results[i][key].value);
+        }
+        if (resultsSet.size > 0) contents[key] = resultsSet;
+    }
+
+    var peopleResultsContents = document.getElementById("peopleResultsContents");
+    for (var i = 0; i < results.length; i++)
+        peopleResultsContents.innerHTML += '<li class="list-group-item"><strong>' + results[i]["name"].value + '</strong>' + ' : ' + results[i]["desc"].value + '</li>';
 }
 
 
@@ -58,7 +77,7 @@ function loadCountryInfo(uriplace) {
         var query =     'PREFIX dbo: <http://dbpedia.org/ontology/>'
                     +   'PREFIX dbp: <http://dbpedia.org/property/>'
                     +   'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>'
-                    +   'SELECT DISTINCT ?name, ?countryName, ?superficie, ?population, ?currencyName, ?langueName'
+                    +   'SELECT DISTINCT ?name, ?countryName, ?superficie, ?population, ?currencyName, ?langueName '
                     +   'WHERE {'
                     +       'OPTIONAL {' + '<' + uriplace + '>' + 'rdfs:label ?name. FILTER langMatches( lang(?name), "FR" ) }'
                     +       'OPTIONAL {' + '<' + uriplace + '>' + 'rdfs:label ?name. FILTER langMatches( lang(?name), "EN" ) }'
@@ -84,7 +103,7 @@ function loadCountryInfo(uriplace) {
                     +       '}'
                     +       'OPTIONAL {'
                     +           '<' + uriplace + '>' + 'dbo:language ?langue.'
-                    +           '?langue rdfs:label ?langueName. FILTER langMatches( lang(?langueName), "FR")'
+                    +           '?langue rdfs:label ?langueName. FILTER langMatches( lang(?langueName), "EN")'
                     +       '}'
                     +   '} LIMIT 20';
 
@@ -107,7 +126,7 @@ function loadPlaceInfo(uriplace) {
                 +   'PREFIX dbp: <http://dbpedia.org/property/>'
                 +   'PREFIX dct: <http://purl.org/dc/terms/>'
                 +   'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>'
-                +   'SELECT DISTINCT ?name, ?countryName, ?superficie, ?population, ?currencyName, ?langueName'
+                +   'SELECT DISTINCT ?name, ?countryName, ?superficie, ?population, ?currencyName, ?langueName '
                 +   'WHERE {'
                 +       'OPTIONAL {' + '<' + uriplace + '>' + 'rdfs:label ?name. FILTER langMatches( lang(?name), "FR" ) }'
                 +       'OPTIONAL {' + '<' + uriplace + '>' + 'rdfs:label ?name. FILTER langMatches( lang(?name), "EN" ) }'
@@ -154,7 +173,7 @@ function loadPlaceInfo(uriplace) {
                 +       '}'
                 +       'OPTIONAL {'
                 +           '<' + uriplace + '>' + 'dbo:language ?langue.'
-                +           '?langue rdfs:label ?langueName. FILTER langMatches( lang(?langueName), "FR")'
+                +           '?langue rdfs:label ?langueName. FILTER langMatches( lang(?langueName), "EN")'
                 +       '}'
                 +   '} LIMIT 20';
 
@@ -192,7 +211,7 @@ function displayResultsInfo(results) {
     for (var key in contents) {
         for (let item of contents[key].values()) {
             if (key == "superficie")
-                searchInfoContents.innerHTML += '<li class="list-group-item">' + titleFields[key] + ' : ' + (item / 100000) + '</li>';
+                searchInfoContents.innerHTML += '<li class="list-group-item">' + titleFields[key] + ' : ' + (item / 100000) + ' km²</li>';
             else searchInfoContents.innerHTML += '<li class="list-group-item">' + titleFields[key] + ' : ' + item + '</li>';
         }
     }
