@@ -1,5 +1,5 @@
 var map;
-
+var marker;
 
 /** Recupere le marqueur (cercle) correspondant a un seisme
  * @param earthquake Le seisme a marquer
@@ -55,7 +55,8 @@ function putEarthquake(place) {
         map.fitBounds(bounds);
 
         // TODO : A retirer, juste pour marquer les points que l'on a cherches
-        var mark = new google.maps.Marker(
+        if (marker) marker.setMap(null);
+        marker = new google.maps.Marker(
             {
                 position:{  lat:place.geometry.location.lat(),
                             lng:place.geometry.location.lng()
@@ -68,7 +69,7 @@ function putEarthquake(place) {
         eq.longitude = place.geometry.location.lng();
     }
 
-    console.log(eq);
+    console.log(map);
 
     var limit = strToInt(document.getElementById("limit").value);
     limit == null ? loadEarthquakeLayerBis(eq) : loadEarthquakeLayerBis(eq, limit);
@@ -103,6 +104,7 @@ function mapInitialisation() {
     function earthquakeResearch() {
         var place = searchBox.getPlaces()[0];
 
+        document.getElementById("peopleResultsZone").hidden = true;
         putEarthquake(place);
 
         if (place) {
@@ -110,6 +112,7 @@ function mapInitialisation() {
             var searchInfoContents = document.getElementById("searchInfoContents");
             var videoLinksContents = document.getElementById("videoLinksContents");
             var peopleResultsContents = document.getElementById("peopleResultsContents");
+
             searchInfoTitle.innerHTML = "";
             searchInfoContents.innerHTML = "";
             videoLinksContents.innerHTML = "";

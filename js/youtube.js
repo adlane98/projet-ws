@@ -30,6 +30,8 @@ function youtubeCallback() {
         videoLinksContents.innerHTML += '<button type="button" class="list-group-item list-group-item-action" onClick="loadVideo(' + i + ')">'
                                         + results.items[i].snippet.title + '</button>'
     }
+    loadVideo(0);
+    stopVideo();
 }
 
 
@@ -39,11 +41,12 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementById('videoZoneScript');
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+
 var player;
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
-        height: '360',
-        width: '640',
+        height: '405',
+        width: '720',
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
@@ -52,7 +55,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-  //event.target.playVideo();
+
 }
 
 var done = false;
