@@ -20,15 +20,17 @@ function youtubeCallback() {
     var results;
     try{results = JSON.parse(this.responseText);}
     catch{}
-    console.log(results); // TODO: traiter les resultats de la requete
-    var yz = document.getElementById("videoLinksZone");
-    yz.hidden = false;
+    console.log(results);
+    document.getElementById("videoZone").hidden = false;
+    document.getElementById("videoLinksZone").hidden = false;
 
     var videoLinksContents = document.getElementById("videoLinksContents");
     for (i = 0; i < results.items.length; i++) {
         arrYTID[i] = results.items[i].id.videoId;
-        videoLinksContents.innerHTML += '<button type="button" class="list-group-item list-group-item-action" onClick="loadVideo(' + i + ')">'
-                                        + results.items[i].snippet.title + '</button>'
+        videoLinksContents.innerHTML += '<button type="button" class="list-group-item list-group-item-action" style="display:table" onClick="loadVideo(' + i + ')">'
+                                      +     '<span style="display:table-cell;vertical-align:middle;padding:5px;"><img src="'+ results.items[i].snippet.thumbnails.default.url +'"></span>'
+                                      +     '<span style="display:table-cell;vertical-align:middle;padding:5px;">' + results.items[i].snippet.title + '</span>'
+                                      + '</button>'
     }
     loadVideo(0);
     stopVideo();

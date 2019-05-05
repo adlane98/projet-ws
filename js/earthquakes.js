@@ -41,8 +41,7 @@ function putEarthquake(place) {
         starttime   : document.getElementById("starttime").value,
         endtime     : document.getElementById("endtime").value,
         minmagnitude: strToFloat(document.getElementById("minmagnitude").value),
-        maxmagnitude: strToFloat(document.getElementById("maxmagnitude").value),
-        maxradiuskm : strToFloat(document.getElementById("maxradiuskm").value)
+        maxmagnitude: strToFloat(document.getElementById("maxmagnitude").value)
     };
     if (place) {
         var bounds = new google.maps.LatLngBounds();
@@ -54,7 +53,6 @@ function putEarthquake(place) {
             bounds.extend(place.geometry.location);
         map.fitBounds(bounds);
 
-        // TODO : A retirer, juste pour marquer les points que l'on a cherches
         if (marker) marker.setMap(null);
         marker = new google.maps.Marker(
             {
@@ -67,9 +65,8 @@ function putEarthquake(place) {
 
         eq.latitude = place.geometry.location.lat();
         eq.longitude = place.geometry.location.lng();
+        eq.maxradiuskm = strToFloat(document.getElementById("maxradiuskm").value);
     }
-
-    console.log(map);
 
     var limit = strToInt(document.getElementById("limit").value);
     limit == null ? loadEarthquakeLayerBis(eq) : loadEarthquakeLayerBis(eq, limit);
@@ -186,7 +183,10 @@ function mapInitialisation() {
         google.maps.event.trigger(input, 'keydown', {keyCode : 13});
         google.maps.event.trigger(this, 'focus', {});
         if(!input.value)
+        {
+            if (marker) marker.setMap(null);
             putEarthquake(null)
+        }
     }
 
     /******* Seismes *******/
@@ -224,21 +224,6 @@ function mapInitialisation() {
 
 function loadEarthquakeLayerBis(eq, limit = 100) {
     eraseEarthquakeLayer();
-
-    var zoneCarre = eq.minlatitude || eq.minlongitude || eq.maxlatitude || eq.maxlongitude;
-    var zoneCirculaire = eq.maxradius || eq.maxradiuskm;
-
-    if (zoneCirculaire && zoneCarre)
-        throw "Des parametres de definition a la fois d'une zone circulaire et d'une zone carree sont definis.";
-
-    if (zoneCirculaire) {
-        if (eq.maxradius && eq.maxradiuskm) {
-            throw "maxradius et maxradiuskm ne peuvent pas etre specifies tous les deux.";
-        }
-        if (!eq.latitude || !eq.longitude) {
-            throw "Il faut specifier la latitude et la longitude pour une zone circulaire.";
-        }
-    }
 
     var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
     query += '&limit=' + limit;
