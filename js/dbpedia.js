@@ -1,6 +1,6 @@
 var infoResults;
 var peopleResults;
-var titleFields = {"countryName": "Pays", "superficie": "Superficie", "population": "Population", "currencyName": "Devise", "langueName": "Languages"}
+var titleFields = {"countryName": "Pays", "superficie": "Superficie", "population": "Population", "currencyName": "Devise", "langueName": "Langue"}
 var peopleFields = {"name": "Nom", "desc": "Description"};
 
 function makeRequest(request, callback) {
@@ -49,8 +49,6 @@ function loadCountryPeople(country, nb = 10) {
 function peopleCallback() {
     try{results = JSON.parse(this.responseText).results.bindings;}
     catch{}
-    console.log("people call back");
-    console.log(results); // TODO: traiter les resultats de la requete
 
     var peopleResultsZone = document.getElementById("peopleResultsZone");
     var prz = document.getElementById("peopleResultsZone");
@@ -183,10 +181,7 @@ function loadPlaceInfo(uriplace) {
 function placeInfoCallback() {
     try{infoResults = JSON.parse(this.responseText).results.bindings;}
     catch{}
-    console.log("place info call back");
-    console.log(infoResults);
 
-    // TODO: traitement des resultats
     if (infoResults) displayResultsInfo(infoResults)
 }
 

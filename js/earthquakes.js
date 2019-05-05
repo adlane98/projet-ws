@@ -6,7 +6,6 @@ var map;
  * @return Le marqueur correspondant
  */
 function circleMagnitude(earthquake) {
-    console.log("Circle magnitude");
     var color = [];
 
     var minMag = 1.0;
@@ -37,41 +36,42 @@ function circleMagnitude(earthquake) {
 }
 
 function putEarthquake(place) {
-    var bounds = new google.maps.LatLngBounds();
-
-    if (!place.geometry) return;
-    if (place.geometry.viewport)
-        bounds.union(place.geometry.viewport);
-    else
-        bounds.extend(place.geometry.location);
-    map.fitBounds(bounds);
-
-    // TODO : A retirer, juste pour marquer les points que l'on a cherches
-    var mark = new google.maps.Marker(
-        {
-            position:{  lat:place.geometry.location.lat(),
-                        lng:place.geometry.location.lng()
-                    },
-            map:map
-        }
-    );
-
+    /******* Recherche avancee *******/
     var eq = {
-        //starttime   : ,
-        //endtime     : ,
-        //minmagnitude: ,
-        //maxmagnitude: ,
-        latitude: place.geometry.location.lat(),
-        longitude: place.geometry.location.lng(),
-        //minlatitude : ,
-        //minlongitude: ,
-        //maxlatitude : ,
-        //maxlongitude: ,
-        //maxradius   : ,
-        maxradiuskm : 3000
+        starttime   : document.getElementById("starttime").value,
+        endtime     : document.getElementById("endtime").value,
+        minmagnitude: strToFloat(document.getElementById("minmagnitude").value),
+        maxmagnitude: strToFloat(document.getElementById("maxmagnitude").value),
+        maxradiuskm : strToFloat(document.getElementById("maxradiuskm").value)
     };
-    loadEarthquakeLayerBis(eq);
-    console.log(place.geometry.location.lat() + " " + place.geometry.location.lng()); // TODO: Utiliser la localisation pour formuler la requete
+    if (place) {
+        var bounds = new google.maps.LatLngBounds();
+
+        if (!place.geometry) return;
+        if (place.geometry.viewport)
+            bounds.union(place.geometry.viewport);
+        else
+            bounds.extend(place.geometry.location);
+        map.fitBounds(bounds);
+
+        // TODO : A retirer, juste pour marquer les points que l'on a cherches
+        var mark = new google.maps.Marker(
+            {
+                position:{  lat:place.geometry.location.lat(),
+                            lng:place.geometry.location.lng()
+                        },
+                map:map
+            }
+        );
+
+        eq.latitude = place.geometry.location.lat();
+        eq.longitude = place.geometry.location.lng();
+    }
+
+    console.log(eq);
+
+    var limit = strToInt(document.getElementById("limit").value);
+    limit == null ? loadEarthquakeLayerBis(eq) : loadEarthquakeLayerBis(eq, limit);
 }
 
 
@@ -95,21 +95,17 @@ function mapInitialisation() {
     });
 
     /******* Recherche *******/
+
     var input = document.getElementById('searchBox');
     var searchBox = new google.maps.places.SearchBox(input);
 
-    function earthquakeResearchButton(location) {
-        var geocoder = new google.maps.Geocoder();
-        geocoder.geocode({'address':location}, function (data, status) {
-            putEarthquake(data[0]);
-        });
-    }
 
     function earthquakeResearch() {
         var place = searchBox.getPlaces()[0];
 
+        putEarthquake(place);
+
         if (place) {
-            putEarthquake(place);
             var searchInfoTitle = document.getElementById("searchInfoTitle");
             var searchInfoContents = document.getElementById("searchInfoContents");
             var videoLinksContents = document.getElementById("videoLinksContents");
@@ -126,14 +122,12 @@ function mapInitialisation() {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", request, false);
             xhr.send(null);
-            console.log(request);
             var keywords = input.value;
             try {
                 keywords = JSON.parse(xhr.responseText).data.translations[0].translatedText
             } catch {
             }
             var lookUpDBpediaQuery = "http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?&QueryString=" + keywords;
-            console.log(lookUpDBpediaQuery);
             var req = new XMLHttpRequest();
             req.open("GET", lookUpDBpediaQuery, false);
             req.send(null); // Quand il n'y a pas de resultats, la longueur du resultat est de 216
@@ -150,8 +144,6 @@ function mapInitialisation() {
                     return; // On sort de la fonction si on a rien trouve TODO : Afficher "rien trouver" sur la page
                 }
             }
-            console.log(req.responseText);
-            console.log(req.responseText.length);
 
             // On recupere l'URI
             var xmlparser = new DOMParser();
@@ -160,7 +152,6 @@ function mapInitialisation() {
             var isplace = false;
             var results = xmldoc.getElementsByTagName("Result");
             var index = 0;
-            console.log(results.length);
             for (i = 0; i < results.length && !isplace; i++) {
                 var classes = results[i].children[3].children // On recupere les classes qui sont des types de l'URI recherchee "<Classes>" : indice 3
                 if (classes.length == 0) isplace = true; // S'il n'y a rien dans les types alors on considere que c'est un lieu
@@ -171,7 +162,6 @@ function mapInitialisation() {
             }
             if (isplace) {
                 var queryURI = results[index].children[1].innerHTML; //"<URI>" :  indice 1
-                console.log(queryURI);
                 //On lance la requete et l'affichage
                 var peopleRes;
                 var infoRes;
@@ -189,40 +179,11 @@ function mapInitialisation() {
     searchBox.addListener('places_changed', earthquakeResearch);
 
     document.getElementById('searchButton').onclick = () => {
-        var location = input.value;
-        console.log(location);
-        earthquakeResearchButton(location);
-    };
-
-    /******* Recherche avancee *******/
-    var advancedSearchButton = document.getElementById('advancedSearchButton');
-    advancedSearchButton.onclick = () => {
-        var eq = {
-            starttime   : document.getElementById("starttime").value,
-            endtime     : document.getElementById("endtime").value,
-            minmagnitude: strToFloat(document.getElementById("minmagnitude").value),
-            maxmagnitude: strToFloat(document.getElementById("maxmagnitude").value),
-        }
-
-        var circleEnable = !document.getElementById("latitude").disabled;
-        var rectEnable = !document.getElementById("minlatitude").disabled;
-
-        if (circleEnable && rectEnable) {
-            throw "Selections des deux facons de rechercher.";
-        }
-        else if (circleEnable) {
-            eq.latitude = strToFloat(document.getElementById("latitude").value);
-            eq.longitude = strToFloat(document.getElementById("longitude").value);
-            eq.maxradiuskm = strToFloat(document.getElementById("maxradiuskm").value);
-        }
-        else if (rectEnable) {
-            eq.minlatitude = strToFloat(document.getElementById("minlatitude").value);
-            eq.minlongitude = strToFloat(document.getElementById("minlongitude").value);
-            eq.maxlatitude = strToFloat(document.getElementById("maxlatitude").value);
-            eq.maxlongitude = strToFloat(document.getElementById("maxlongitude").value);
-        }
-        var limit = strToInt(document.getElementById("limit").value);
-        limit == null ? loadEarthquakeLayerBis(eq) : loadEarthquakeLayerBis(eq, limit);
+        google.maps.event.trigger(input, 'focus', {});
+        google.maps.event.trigger(input, 'keydown', {keyCode : 13});
+        google.maps.event.trigger(this, 'focus', {});
+        if(!input.value)
+            putEarthquake(null)
     }
 
     /******* Seismes *******/
@@ -257,22 +218,6 @@ function mapInitialisation() {
  * @param rad   Rayon de recherche autour de la position donnee
  * @param limit Nombre maximum de seismes a afficher
  */
-function loadEarthquakeLayer(start = null, end = null, min = null, max = null, lat = null, lng = null, rad = null, limit = 100) {
-    var query = 'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&jsonerror=true';
-    query += '&limit=' + limit;
-    if (start && end) //(start || end)
-        query += '&starttime=' + start + '&endtime=' + end;
-    if (min || max)
-        query += '&minmagnitude=' + min + '&maxmagnitude=' + max;
-    if (lat && lng) //(lat || lng)
-        query += '&latitude=' + lat + '&longitude='+ lng;
-    if (lat && lng && rad)
-        query += '&maxradiuskm=' + rad;
-
-    map.data.loadGeoJson(query);
-
-    console.log(query);
-}
 
 function loadEarthquakeLayerBis(eq, limit = 100) {
     eraseEarthquakeLayer();
@@ -296,8 +241,7 @@ function loadEarthquakeLayerBis(eq, limit = 100) {
     query += '&limit=' + limit;
 
     for (let key in eq) {
-        console.log(key);
-        if (eq[key] != null) query += '&' + key + '=' + eq[key];
+        if (eq[key] && eq[key] != "" && eq[key] != null) query += '&' + key + '=' + eq[key];
     }
 
     map.data.loadGeoJson(query);
@@ -317,7 +261,7 @@ function eraseEarthquakeLayer() {
  */
 function getContent(earthquake) {
     return '<span style="color:red">' + earthquake.getProperty('place') + '</span></br>'
-         + 'Date: ' + parseDate2(earthquake.getProperty('time')) + '</br>'
+         + 'Date: ' + parseDate(earthquake.getProperty('time')) + '</br>'
          + 'Magnitude: ' + earthquake.getProperty('mag') + '</br>'
          + '<a href="' + earthquake.getProperty('url') + '" target="_blank">Details</a>';
 }
@@ -327,11 +271,9 @@ function getContent(earthquake) {
  * @param date Un nombre de secondes
  * @return La date correspondante au format UTC
  */
-function parseDate2(date) {
-    console.log(date);
+function parseDate(date) {
     var temps = new Date();
     temps.setTime(date);
-    console.log(temps.toUTCString());
     return temps.toUTCString();
 }
 
